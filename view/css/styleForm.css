@@ -1,0 +1,100 @@
+/* Styles globaux du formulaire */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #fff8e7; /* couleur douce, beige clair */
+    color: #2f4f2f; /* vert foncé pour le texte */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px;
+}
+
+h2, h3 {
+    color: #3a593a; /* vert harmonieux avec le logo */
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+form {
+    background-color: #fdf6e3; /* beige clair proche du logo */
+    padding: 20px 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 450px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+input[type="date"],
+select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    border: 1px solid #c0bfb8;
+    font-size: 1rem;
+}
+
+/* Bouton principal */
+button {
+    background-color: #a0522d; /* marron/orangé du tronc de l'arbre */
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #8b3e1f;
+}
+
+/* Grille des créneaux horaires */
+.horaires-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+/* Créneaux disponibles */
+.horaire-dispo {
+    border: 1px solid #3a593a;
+    padding: 12px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border-radius: 8px;
+    background-color: #eaf3ea; /* vert très clair */
+    cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.horaire-dispo:hover {
+    background-color: #d5e5d5;
+    transform: scale(1.05);
+}
+
+/* Créneaux indisponibles */
+.horaire-indispo {
+    background: #ddd;
+    padding: 12px;
+    text-align: center;
+    color: #999;
+    border-radius: 8px;
+}
+
+/* Alignement du logo si besoin */
+header img {
+    max-width: 120px;
+    margin-bottom: 20px;
+}
