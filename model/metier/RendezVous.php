@@ -2,23 +2,37 @@
 
 class RendezVous
 {
+    // Statuts possibles (une seule graphie, utilisée partout)
+    public const STATUT_EN_ATTENTE = 'en_attente';
+    public const STATUT_CONFIRME   = 'confirmé';
+    public const STATUT_ANNULE     = 'annulé';
+
     private ?int $idRdv = null;
     private string $dateRdv;
     private string $heureRdv;
     private string $statut;
     private string $message;
 
-    private Utilisateur $utilisateur;
+    private string $nomClient;
+    private string $emailClient;
+    private string $telephone;
     private Service $service;
 
-    public function __construct(int $idRdv, string $dateRdv, string $heureRdv, Service $service, string $statut = "en attente", string $message = '') {
+    public function __construct(int $idRdv, string $dateRdv, string $heureRdv, Service $service, string $statut = self::STATUT_EN_ATTENTE, string $message = '', string $nomClient = '', string $emailClient = '', string $telephone = '') {
         $this->idRdv = $idRdv;
         $this->dateRdv = $dateRdv;
         $this->heureRdv = $heureRdv;
         $this->service = $service;
         $this->statut = $statut;
         $this->message = $message;
+        $this->nomClient = $nomClient;
+        $this->emailClient = $emailClient;
+        $this->telephone = $telephone;
     }
+
+    public function getNomClient(): string { return $this->nomClient; }
+    public function getEmailClient(): string { return $this->emailClient; }
+    public function getTelephone(): string { return $this->telephone; }
 
     //GETTER
     public function getIdRdv(): ?int {
@@ -75,11 +89,11 @@ class RendezVous
 
     //FONCTION POUR LE STATUT
     public function confirmer(): void {
-        $this->statut = "confirmé";
+        $this->statut = self::STATUT_CONFIRME;
     }
 
     public function annuler(): void {
-        $this->statut = "annulé";
+        $this->statut = self::STATUT_ANNULE;
     }
 
     
