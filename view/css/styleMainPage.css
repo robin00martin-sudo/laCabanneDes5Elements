@@ -664,3 +664,8 @@ button:hover {
     transform: rotate(45deg) translate(6px, 6px);
   }
 }
+/* ===== Formulaire de contact : retour visuel + champ anti-robot ===== */
+.piege { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.contact-message { padding: 10px 14px; border-radius: 6px; margin-bottom: 14px; }
+.contact-ok { background: #e6f4ea; color: #1e5b2f; border-left: 4px solid #2e7d32; }
+.contact-erreur { background: #fdecec; color: #7a1c16; border-left: 4px solid #b3261e; }
