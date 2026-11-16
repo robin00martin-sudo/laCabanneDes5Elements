@@ -5,13 +5,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>La cabanne des 5 éléments</title>
-  <link rel="icon" href="images\la-cabane-des-5-elements-Logo.png">
+  <meta name="description" content="La cabane des 5 éléments : shiatsu, réflexologie et massages bien-être. Présentation de la praticienne, prestations, tarifs, horaires et contact.">
+  <link rel="icon" href="images/la-cabane-des-5-elements-Logo.png">
   <link rel="stylesheet" href="view/css/styleMainPage.css">
   <script src="view/JS/menuBurger.js"></script>
 </head>
 
 <body>
-    <header id="home">
+    <header>
       <!-- Icône du menu burger (☰)
          Quand on clique dessus, le menu latéral s’ouvre ou se ferme -->
         <div class="burger" onclick="toggleMenu()">☰</div>
@@ -64,7 +65,7 @@
 
     <!-- Colonne gauche -->
     <div class="column">
-      <img src="images/cgay.jpg">
+      <img src="images/cgay.jpg" alt="Portrait de la praticienne" loading="lazy">
       <h2>Caroline Gay</h2>
 
       <p>
@@ -93,7 +94,7 @@
     <!-- Colonne droite -->
     <div class="column">
       <div class="images-row">
-        <img src="images/cabane.jpg">
+        <img src="images/cabane.jpg" alt="La cabane des 5 éléments, lieu de soin" loading="lazy">
       </div>
       <h2>Le lieu de soin</h2>
 
@@ -215,7 +216,7 @@
       </div> 
     </div> 
     
-    <img class="munz-logo" src="images/munzFloor.jpg"> 
+    <img class="munz-logo" src="images/munzFloor.jpg" alt="Logo MUNZ FLOOR" loading="lazy"> 
     
     <div class="timeline-item"> 
       <span class="timeline-dot"></span> 
@@ -303,7 +304,7 @@
     sur les déséquilibres énergétiques.
   </p>
   
-  <img src="images/massage.png" class="image-prestation">
+  <img src="images/massage.png" class="image-prestation" alt="Illustration d'un massage" loading="lazy">
 
   <h3>Contre-indications</h3>
 
@@ -442,19 +443,19 @@
     
     <!-- Bloc infos -->
     <div class="info-box-social">
-      <div class="icon"><img src="images/email.png"></div>
+      <div class="icon"><img src="images/email.png" alt="" aria-hidden="true"></div>
       <h3>Email</h3>
       <p>carolinegay.reflexologue@gmail.com</p>
     </div>
 
     <div class="info-box-social">
-      <div class="icon"><img src="images/pin.png"></div>
+      <div class="icon"><img src="images/pin.png" alt="" aria-hidden="true"></div>
       <h3>Localisation</h3>
       <p>12 All. des Érables, 40220 Tarnos</p>
     </div>
 
     <div class="info-box-social">
-      <div class="icon"><img src="images/tel.png"></div>
+      <div class="icon"><img src="images/tel.png" alt="" aria-hidden="true"></div>
       <h3>Téléphone</h3>
       <p>06 15 07 04 95</p>
     </div>
@@ -462,14 +463,14 @@
     <!-- Bloc réseaux sociaux -->
     <div class="info-box social">
       <a href="https://www.instagram.com/caroline_gay_/" target="_blank">
-        <img src="images/instagram.svg" alt="">
+        <img src="images/instagram.svg" alt="Instagram">
       </a>
       <h3>Compte professionnel</h3>
     </div>
 
     <div class="info-box social">
       <a href="https://www.facebook.com/CarolineCarolinegay/" target="_blank">
-        <img src="images/facebook.webp" alt="">
+        <img src="images/facebook.webp" alt="Facebook">
       </a>
       <h3>Facebook</h3>
     </div>
@@ -494,22 +495,38 @@
 
     <div class="right">
       <!-- Formulaire de contact -->
-    <form class="contact-form" action="view/contact.php" method="POST">
-      <!-- Les données sont envoyées vers contact.php -->
+      <?php $retourContact = $_GET['contact'] ?? ''; ?>
+      <?php if ($retourContact === 'ok'): ?>
+        <p class="contact-message contact-ok" role="status">Merci ! Votre message a bien été envoyé.</p>
+      <?php elseif ($retourContact !== ''): ?>
+        <p class="contact-message contact-erreur" role="alert">
+          <?= $retourContact === 'trop_rapide' ? "Merci de patienter quelques secondes avant d'envoyer un nouveau message."
+              : ($retourContact === 'invalide' ? "Votre message n'a pas pu être envoyé : vérifiez que tous les champs sont correctement remplis."
+              : "Votre message n'a pas pu être envoyé. Merci de réessayer plus tard ou d'utiliser les coordonnées ci-dessus.") ?>
+        </p>
+      <?php endif; ?>
+      <form class="contact-form" action="index.php?action=contact" method="POST">
+        <?= csrfChamp() ?>
+        <!-- Champ piège : invisible pour les humains, rempli par les robots -->
+        <div class="piege" aria-hidden="true">
+          <label for="site_web">Ne pas remplir</label>
+          <input type="text" id="site_web" name="site_web" tabindex="-1" autocomplete="off">
+        </div>
 
         <label for="name">Nom</label>
-        <input type="text" name="name" placeholder="Entrer votre nom" required>
+        <input type="text" id="name" name="name" placeholder="Entrer votre nom" maxlength="100" required>
 
         <label for="email">Email</label>
-        <input type="email" name="email" placeholder="Entrer votre adresse mail" required>
+        <input type="email" id="email" name="email" placeholder="Entrer votre adresse mail" required>
 
         <label for="message">Message</label>
-        <textarea name="message" rows="4" placeholder="Entrer votre message" required></textarea>
+        <textarea id="message" name="message" rows="4" placeholder="Entrer votre message" maxlength="5000" required></textarea>
 
         <button type="submit">SOUMETTRE</button>
       </form>
 
     </div>
+  </div>
   </section>
 
 </body>
