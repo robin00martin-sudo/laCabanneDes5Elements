@@ -1,62 +1,39 @@
--- phpMyAdmin SQL Dump
--- version 4.6.6deb4
--- https://www.phpmyadmin.net/
---
--- Client :  localhost:3306
--- Généré le :  Ven 08 Mars 2019 à 17:43
--- Version du serveur :  10.1.26-MariaDB-0+deb9u1
--- Version de PHP :  7.0.19-1
+-- Base de données du module de rendez-vous (MySQL 5.7+/8, MariaDB 10.x)
+-- Noms de tables en minuscules : identiques sous Windows et Linux.
+CREATE DATABASE IF NOT EXISTS cabane CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE cabane;
+SET NAMES utf8mb4;
 
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO" ;
-SET time_zone = "+00:00" ;
+DROP TABLE IF EXISTS rendezvous;
+DROP TABLE IF EXISTS service;
 
+CREATE TABLE service (
+    idService   INT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    nomService  VARCHAR(50)  NOT NULL,
+    duree       INT          NOT NULL COMMENT 'durée du soin en minutes',
+    description VARCHAR(4096) NOT NULL DEFAULT ''
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
+CREATE TABLE rendezvous (
+    idRdv        INT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    date_rdv     DATE         NOT NULL,
+    heure_rdv    TIME         NOT NULL COMMENT 'heure de début',
+    heure_fin    TIME         NOT NULL COMMENT 'heure de début + durée du service',
+    statut       VARCHAR(20)  NOT NULL DEFAULT 'en_attente',
+    nom_client   VARCHAR(100) NOT NULL,
+    email_client VARCHAR(150) NOT NULL,
+    telephone    VARCHAR(20)  NULL,
+    message      VARCHAR(1000) NOT NULL DEFAULT '',
+    idService    INT          NOT NULL,
+    cree_le      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    KEY idx_rdv_date (date_rdv),
+    CONSTRAINT fk_rdv_service FOREIGN KEY (idService) REFERENCES service (idService),
+    CONSTRAINT ck_rdv_statut CHECK (statut IN ('en_attente', 'confirmé', 'annulé')),
+    CONSTRAINT ck_rdv_heures CHECK (heure_fin > heure_rdv)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Base de données :   cgay 
---
-
--- --------------------------------------------------------
-
---
--- Structure de la table  Service 
---
-
-CREATE TABLE  Service  (
-    idService     integer (10) PRIMARY KEY AUTO_INCREMENT,
-    nomService    varchar (50) NOT NULL,
-    duree          integer (10),
-    description    varchar (4096)       
-)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- --------------------------------------------------------
-
---
--- Structure de la table  RendezVous 
---
-
-CREATE TABLE  RendezVous  (
-    idRdv           integer (20) PRIMARY KEY AUTO_INCREMENT,
-    date_rdv        DATE NOT NULL,
-    heure_rdv       TIME NOT NULL,
-    statut          varchar (20),
-    message         varchar (4096),
-    idService       integer (10) NOT NULL,
-    FOREIGN KEY (idService) REFERENCES Service(idService)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- --------------------------------------------------------
-
-INSERT INTO service (nomService, duree, description)
-VALUES  ("Reflexologie plantaire", 75, ""),
-        ("Reflexologie plantaire, palmaire et crânienne", 90, ""),
-        ("Shiatsu", 90, ""),
-        ("Mixte shiatsu et réflexologie", 115, "");
-  
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+INSERT INTO service (nomService, duree, description) VALUES
+    ('Réflexologie plantaire', 75, ''),
+    ('Réflexologie plantaire, palmaire et crânienne', 90, ''),
+    ('Shiatsu', 90, ''),
+    ('Mixte shiatsu et réflexologie', 115, '');
