@@ -1,178 +1,112 @@
 <?php
 /*
-  Ce fichier est la PAGE DU FORMULAIRE DE PRISE DE RENDEZ-VOUS.
-
-  Son rôle :
-  - afficher les services disponibles
-  - permettre de choisir une date
-  - afficher les créneaux horaires disponibles
-  - empêcher de choisir une date passée ou déjà réservée
-
-  Ce fichier ne décide rien :
-  il affiche uniquement les informations reçues du contrôleur.
+  PAGE DE PRISE DE RENDEZ-VOUS.
+  Ce fichier se contente d'AFFICHER ce que prépare RendezVousController :
+    $services, $idService, $date, $creneaux (['heure' => 'HH:MM', 'dispo' => bool]),
+    $ferme (jour de fermeture), $erreurs, $erreurBase, $saisie.
+  Toutes les règles sont revérifiées côté serveur au moment de la validation.
 */
-
-
-/*
-  Date du jour (utilisée pour bloquer les dates passées)
-*/
-$today = date('Y-m-d');
-
-/*
-  Sécurité :
-  si la variable $idService n’existe pas encore,
-  on lui donne la valeur "null"
-*/
-$idService = $idService ?? null;
+$saisie = $saisie ?? [];
+$erreurs = $erreurs ?? [];
+$nomService = '';
+foreach ($services as $s) {
+    if ($idService == $s->getIdService()) { $nomService = $s->getNomService() . ' (' . $s->getDuree() . ' min)'; }
+}
 ?>
-
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-
-    <!-- Titre affiché dans l’onglet du navigateur -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prendre un rendez-vous</title>
-
-    <!-- Feuille de style dédiée au formulaire -->
     <link rel="stylesheet" href="view/css/styleForm.css">
-
-    <!-- Icône du site -->
     <link rel="icon" href="images/la-cabane-des-5-elements-Logo.png">
 </head>
-
 <body>
-
 <h2>Prendre un rendez-vous</h2>
 
-<!-- ========================================= -->
-<!-- FORMULAIRE : CHOIX DU SERVICE ET DE LA DATE -->
-<!-- ========================================= -->
+<?php if ($erreurBase): ?>
+    <p class="erreurs" role="alert"><?= h($erreurBase) ?></p>
+<?php endif; ?>
 
+<!-- Étape 1 : choix de la prestation et de la date (le formulaire se recharge à chaque changement) -->
 <form method="get">
-    <!-- 
-      On précise l’action "RDV" pour rester
-      sur la page de prise de rendez-vous
-    -->
     <input type="hidden" name="action" value="RDV">
 
-    <!-- Choix du service -->
     <label for="service">Service :</label>
     <select name="service" id="service" onchange="this.form.submit()">
-        <!-- 
-          À chaque changement de service,
-          le formulaire est envoyé automatiquement
-          pour recharger les disponibilités
-        -->
         <option value="">-- Choisir un service --</option>
-
         <?php foreach ($services as $service): ?>
-            <!-- 
-              Chaque option correspond à une prestation
-            -->
-            <option value="<?= (int)$service->getIdService(); ?>"
-                <?= ($idService == $service->getIdService()) ? "selected" : "" ?>>
-                <?= htmlspecialchars($service->getNomService()); ?>
+            <option value="<?= (int) $service->getIdService() ?>"
+                <?= ($idService == $service->getIdService()) ? 'selected' : '' ?>>
+                <?= h($service->getNomService()) ?> (<?= (int) $service->getDuree() ?> min)
             </option>
         <?php endforeach; ?>
     </select>
 
-    <!-- Choix de la date -->
     <label for="date">Date :</label>
-    <input
-        type="date"
-        name="date"
-        value="<?= htmlspecialchars($date) ?>"
-        min="<?= date('Y-m-d') ?>"
-        onchange="this.form.submit()">
-    <!-- 
-      min = aujourd’hui → empêche de choisir une date passée
-      Le formulaire se recharge automatiquement au changement
-    -->
+    <input type="date" name="date" id="date" value="<?= h($date) ?>" min="<?= date('Y-m-d') ?>"
+           onchange="this.form.submit()">
 </form>
-
 <hr>
 
-<!-- ========================================= -->
-<!-- AFFICHAGE DES CRENEAUX HORAIRES -->
-<!-- ========================================= -->
+<?php if ($idService && !$erreurBase): ?>
+    <h3>Disponibilités du <?= h(date('d/m/Y', strtotime($date))) ?></h3>
 
-<?php if ($idService): ?>
-    <!-- 
-      Les horaires ne sont affichés
-      que si un service est sélectionné
-    -->
-
-    <h3>Disponibilités pour le <?= htmlspecialchars($date) ?></h3>
-
-    <form method="post" action="index.php?action=enregistrer">
-        <!-- Données cachées envoyées au moment de la validation -->
-        <input type="hidden" name="date" value="<?= htmlspecialchars($date) ?>">
-        <input type="hidden" name="service" value="<?= $idService ?>">
-
-        <div class="horaires-grid">
-            <?php
-            /*
-              Gestion du fuseau horaire (France)
-            */
-            $timezone = new DateTimeZone('Europe/Paris');
-
-            /*
-              Date et heure actuelles
-            */
-            $maintenant = new DateTime('now', $timezone);
-
-            /*
-              Boucle sur tous les créneaux possibles
-            */
-            foreach ($horaires as $heure):
-
-                /*
-                  Création d’un objet date/heure pour le créneau
-                */
-                $creneau = DateTime::createFromFormat(
-                    'Y-m-d H:i:s',
-                    "$date $heure:00",
-                    $timezone
-                );
-
-                /*
-                  Vérifie si le créneau est déjà passé
-                */
-                $estPassee = $creneau <= $maintenant;
-
-                /*
-                  Vérifie si le créneau est déjà réservé
-                */
-                $estPrise = in_array(
-                    $creneau->format('H:i:s'),
-                    $heuresPrises
-                );
-            ?>
-
-                <?php if (!$estPassee && !$estPrise): ?>
-                    <!-- Créneau DISPONIBLE -->
-                    <label class="horaire-dispo">
-                        <input type="radio" name="heure" value="<?= $heure ?>" required>
-                        <?= $heure ?>
-                    </label>
-                <?php else: ?>
-                    <!-- Créneau INDISPONIBLE -->
-                    <div class="horaire-indispo">
-                        <?= $heure ?>
-                    </div>
-                <?php endif; ?>
-
-            <?php endforeach; ?>
+    <?php if (!empty($erreurs)): ?>
+        <div class="erreurs" role="alert">
+            <?php foreach ($erreurs as $erreur): ?><div>⚠ <?= h($erreur) ?></div><?php endforeach; ?>
         </div>
+    <?php endif; ?>
 
-        <br>
+    <?php if ($ferme): ?>
+        <p class="info">Le cabinet est fermé ce jour-là. Choisissez une autre date.</p>
+    <?php elseif (!array_filter($creneaux, fn($c) => $c['dispo'])): ?>
+        <p class="info">Aucun créneau disponible ce jour-là pour cette prestation. Essayez une autre date.</p>
+    <?php else: ?>
+        <form method="post" action="index.php?action=enregistrer">
+            <?= csrfChamp() ?>
+            <input type="hidden" name="date" value="<?= h($date) ?>">
+            <input type="hidden" name="service" value="<?= (int) $idService ?>">
 
-        <!-- Validation du rendez-vous -->
-        <button type="submit">Valider le créneau</button>
-    </form>
+            <p><strong><?= h($nomService) ?></strong></p>
+            <div class="horaires-grid">
+                <?php foreach ($creneaux as $c): ?>
+                    <?php if ($c['dispo']): ?>
+                        <label class="horaire-dispo">
+                            <input type="radio" name="heure" value="<?= h($c['heure']) ?>" required
+                                <?= (($_POST['heure'] ?? '') === $c['heure']) ? 'checked' : '' ?>>
+                            <?= h($c['heure']) ?>
+                        </label>
+                    <?php else: ?>
+                        <div class="horaire-indispo"><?= h($c['heure']) ?></div>
+                    <?php endif; ?>
+                <?php endforeach; ?>
+            </div>
+
+            <label for="nom">Nom et prénom</label>
+            <input type="text" id="nom" name="nom" maxlength="100" required autocomplete="name"
+                   value="<?= h($saisie['nom'] ?? '') ?>">
+
+            <label for="email">Adresse e-mail</label>
+            <input type="email" id="email" name="email" maxlength="150" required autocomplete="email"
+                   value="<?= h($saisie['email'] ?? '') ?>">
+
+            <label for="telephone">Téléphone (facultatif)</label>
+            <input type="tel" id="telephone" name="telephone" maxlength="20" autocomplete="tel"
+                   value="<?= h($saisie['telephone'] ?? '') ?>">
+
+            <label for="message">Message (facultatif)</label>
+            <textarea id="message" name="message" rows="3" maxlength="1000"><?= h($saisie['message'] ?? '') ?></textarea>
+
+            <label class="consentement">
+                <input type="checkbox" name="consentement" value="1" required>
+                J'accepte que ces informations soient utilisées uniquement pour traiter ma demande de rendez-vous.
+            </label>
+
+            <button type="submit">Envoyer ma demande</button>
+        </form>
+    <?php endif; ?>
 <?php endif; ?>
-
 </body>
 </html>
